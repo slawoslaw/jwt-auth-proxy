@@ -4,7 +4,7 @@ use crate::claims::Claims;
 
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 
-pub fn generate_jwt(
+pub fn generate_token(
     private_key_path: &str,
     user: &str,
 ) -> Result<String, Box<dyn std::error::Error>> {
@@ -18,7 +18,7 @@ pub fn generate_jwt(
     Ok(token)
 }
 
-pub fn verify_jwt(
+pub fn verify_token(
     public_key_path: &str,
     token: &str,
 ) -> Result<Claims, Box<dyn std::error::Error>> {
