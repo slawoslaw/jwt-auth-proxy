@@ -1,6 +1,5 @@
-use crate::claims::Claims;
 use crate::errors::RequestError;
-use crate::jwt::verify_token;
+use crate::jwt::{verify_token, Claims};
 use axum::{extract::rejection::JsonRejection, response::Json};
 
 use log::error;

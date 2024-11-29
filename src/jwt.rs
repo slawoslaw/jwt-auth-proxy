@@ -1,8 +1,29 @@
 use std::fs::{self};
 
-use crate::claims::Claims;
-
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
+
+use chrono::{Duration, Utc};
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Claims {
+    pub sub: String,
+    pub jti: String,
+    pub exp: usize,
+}
+
+impl Claims {
+    pub fn new(sub: &str, duration_hours: i64) -> Self {
+        let expiration = Utc::now() + Duration::hours(duration_hours);
+
+        Claims {
+            sub: sub.to_owned(),
+            jti: Uuid::new_v4().to_string(),
+            exp: expiration.timestamp() as usize,
+        }
+    }
+}
 
 pub fn generate_token(
     private_key_path: &str,

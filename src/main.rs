@@ -1,5 +1,4 @@
 mod api;
-mod claims;
 mod errors;
 mod jwt;
 
