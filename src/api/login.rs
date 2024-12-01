@@ -1,7 +1,10 @@
-use axum::{extract::rejection::JsonRejection, response::Json};
+use axum::{
+    extract::{rejection::JsonRejection, State},
+    response::Json,
+};
 
-use crate::errors::RequestError;
 use crate::jwt::generate_token;
+use crate::{errors::RequestError, AppState};
 use log::error;
 use serde::{Deserialize, Serialize};
 use std::env;
@@ -18,13 +21,9 @@ pub struct LoginResponse {
 }
 
 pub async fn handler(
+    State(state): State<AppState>,
     payload: Result<Json<LoginPayload>, JsonRejection>,
 ) -> Result<Json<LoginResponse>, RequestError> {
-    let private_key_path = env::var("PRIVATE_KEY_PATH").map_err(|_| {
-        error!("Missing PRIVATE_KEY_PATH env");
-        RequestError::SomethingWentWrong()
-    })?;
-
     let payload = payload.map_err(|_| {
         RequestError::InvalidRequest("Invalid JSON format or missing fields".to_string())
     })?;
@@ -46,7 +45,7 @@ pub async fn handler(
     })?;
 
     if payload.username == auth_username && payload.password == auth_password {
-        let jwt = match generate_token(&private_key_path, &payload.username) {
+        let jwt = match generate_token(&*state.private_key_provider, &payload.username) {
             Ok(token) => token,
             Err(e) => {
                 error!("{}", e);
