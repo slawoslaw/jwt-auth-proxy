@@ -5,7 +5,7 @@ use axum::{
 
 use crate::jwt::generate_token;
 use crate::{errors::RequestError, AppState};
-use log::error;
+use log::{error, warn};
 use serde::{Deserialize, Serialize};
 use std::env;
 
@@ -44,8 +44,21 @@ pub async fn handler(
         RequestError::SomethingWentWrong()
     })?;
 
+    const DEFAULT_TOKEN_DURATION: i64 = 20;
+
+    let duration = env::var("TOKEN_DURATION_MIN")
+        .ok()
+        .and_then(|duration| {
+            duration.parse::<i64>()
+                .map_err(|_| {
+                    warn!("Wrong token duration env. Using default value: {}", DEFAULT_TOKEN_DURATION)
+                })
+                .ok()
+        })
+        .unwrap_or(DEFAULT_TOKEN_DURATION);
+
     if payload.username == auth_username && payload.password == auth_password {
-        let jwt = match generate_token(&*state.private_key_provider, &payload.username) {
+        let jwt = match generate_token(&*state.private_key_provider, &payload.username, duration) {
             Ok(token) => token,
             Err(e) => {
                 error!("{}", e);

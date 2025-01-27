@@ -19,7 +19,7 @@ pub struct Claims {
 
 impl Claims {
     pub fn new<T: TimeProvider>(time_provider: &T, sub: &str, duration_minutes: i64) -> Self {
-        let expiration = time_provider.now() + Duration::hours(duration_minutes);
+        let expiration = time_provider.now() + Duration::minutes(duration_minutes);
 
         Claims {
             sub: sub.to_owned(),
@@ -32,9 +32,10 @@ impl Claims {
 pub fn generate_token(
     private_key_provider: &dyn PrivateKeyProvider,
     user: &str,
+    duration: i64
 ) -> Result<String, Box<dyn std::error::Error>> {
     let private_key = private_key_provider.load()?;
-    let claims = Claims::new(&SystemTimeProvider, user, 30);
+    let claims = Claims::new(&SystemTimeProvider, user, duration);
     let header = Header::new(Algorithm::ES256);
     let key = EncodingKey::from_ec_pem(&private_key)?;
     let token = encode(&header, &claims, &key)?;
@@ -84,13 +85,13 @@ mod tests {
         let test_user = "test@user.com";
         let uuid_regex =
             Regex::new(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$").unwrap();
-        let claims = Claims::new(&mock_provider, test_user, 2);
+        let claims = Claims::new(&mock_provider, test_user, 20);
 
         assert_eq!(claims.sub, test_user);
         assert!(uuid_regex.is_match(&claims.jti));
         assert_eq!(
             claims.exp,
-            (mock_time + Duration::hours(2)).timestamp() as usize
+            (mock_time + Duration::minutes(20)).timestamp() as usize
         );
     }
 }
