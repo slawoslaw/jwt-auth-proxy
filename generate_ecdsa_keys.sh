@@ -1,8 +1,21 @@
 #!/bin/bash
 
+FOLDER_PATH="keys"
+
+# Check if the folder exists
+if [ ! -d "$FOLDER_PATH" ]; then
+  # If the folder doesn't exist, create it
+  echo "Folder does not exist. Creating it now..."
+  mkdir -p "$FOLDER_PATH"
+  echo "Folder created at: $FOLDER_PATH"
+else
+  # If the folder exists
+  echo "Folder already exists at: $FOLDER_PATH"
+fi
+
 # Define file names
-PRIVATE_KEY_FILE="keys/jwt_ecdsa_key.pem"
-PUBLIC_KEY_FILE="keys/jwt_ecdsa_key.pub.pem"
+PRIVATE_KEY_FILE="${FOLDER_PATH}/jwt_ecdsa_key.pem"
+PUBLIC_KEY_FILE="${FOLDER_PATH}/jwt_ecdsa_key.pub.pem"
 
 # Generate ECDSA private key using prime256v1 curve
 echo "Generating ECDSA private key..."
