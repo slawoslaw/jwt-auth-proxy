@@ -10,12 +10,16 @@ use env_logger;
 
 use log::info;
 use std::{env, sync::Arc};
-use utils::key::{LocalFileKeyLoader, PrivateKeyProvider, PublicKeyProvider};
+use utils::{
+    env::load_env_int,
+    key::{LocalFileKeyLoader, PrivateKeyProvider, PublicKeyProvider},
+};
 
 #[derive(Clone)]
 pub struct AppState {
     pub private_key_provider: Arc<dyn PrivateKeyProvider + Send + Sync>,
     pub public_key_provider: Arc<dyn PublicKeyProvider + Send + Sync>,
+    pub token_duration: i64,
 }
 
 pub fn create_app_state_from_env() -> Result<AppState, Box<dyn std::error::Error>> {
@@ -29,9 +33,13 @@ pub fn create_app_state_from_env() -> Result<AppState, Box<dyn std::error::Error
         key_path: public_key_path,
     };
 
+    const DEFAULT_TOKEN_DURATION: i64 = 20;
+    let token_duration = load_env_int("TOKEN_DURATION_MIN", DEFAULT_TOKEN_DURATION);
+
     Ok(AppState {
         private_key_provider: Arc::new(private_loader),
         public_key_provider: Arc::new(public_loader),
+        token_duration,
     })
 }
 
