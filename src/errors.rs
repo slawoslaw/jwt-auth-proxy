@@ -28,6 +28,7 @@ pub enum RequestError {
     InvalidToken(String),
     ExpiredToken(),
     InvalidRequest(String),
+    InternalError(String)
 }
 
 impl RequestError {
@@ -38,6 +39,7 @@ impl RequestError {
             RequestError::InvalidToken(_) => StatusCode::UNAUTHORIZED,
             RequestError::ExpiredToken() => StatusCode::UNAUTHORIZED,
             RequestError::InvalidRequest(_) => StatusCode::BAD_REQUEST,
+            RequestError::InternalError(_) => StatusCode::INTERNAL_SERVER_ERROR
         }
     }
 }
@@ -50,6 +52,7 @@ impl fmt::Display for RequestError {
             RequestError::InvalidToken(msg) => write!(f, "{}", msg),
             RequestError::ExpiredToken() => write!(f, "Expired token"),
             RequestError::InvalidRequest(msg) => write!(f, "{}", msg),
+            RequestError::InternalError(msg) => write!(f, "{}", msg),
         }
     }
 }

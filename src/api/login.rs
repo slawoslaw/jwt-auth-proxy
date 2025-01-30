@@ -49,7 +49,7 @@ pub async fn handler(
             Ok(token) => token,
             Err(e) => {
                 error!("{}", e);
-                return Err(RequestError::InvalidRequest("Problem with jwt".to_string()));
+                return Err(RequestError::InternalError("Problem with jwt generation".to_string()));
             }
         };
 
