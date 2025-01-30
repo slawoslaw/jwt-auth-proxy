@@ -25,6 +25,8 @@ impl ErrorMessage {
 pub enum RequestError {
     SomethingWentWrong(),
     InvalidCredentials(),
+    InvalidToken(String),
+    ExpiredToken(),
     InvalidRequest(String),
 }
 
@@ -33,6 +35,8 @@ impl RequestError {
         match self {
             RequestError::SomethingWentWrong() => StatusCode::INTERNAL_SERVER_ERROR,
             RequestError::InvalidCredentials() => StatusCode::UNAUTHORIZED,
+            RequestError::InvalidToken(_) => StatusCode::UNAUTHORIZED,
+            RequestError::ExpiredToken() => StatusCode::UNAUTHORIZED,
             RequestError::InvalidRequest(_) => StatusCode::BAD_REQUEST,
         }
     }
@@ -43,6 +47,8 @@ impl fmt::Display for RequestError {
         match self {
             RequestError::SomethingWentWrong() => write!(f, "Something went wrong"),
             RequestError::InvalidCredentials() => write!(f, "Invalid credentials"),
+            RequestError::InvalidToken(msg) => write!(f, "{}", msg),
+            RequestError::ExpiredToken() => write!(f, "Expired token"),
             RequestError::InvalidRequest(msg) => write!(f, "{}", msg),
         }
     }

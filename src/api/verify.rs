@@ -3,6 +3,7 @@ use crate::jwt::{verify_token, Claims};
 use crate::AppState;
 use axum::extract::State;
 use axum::{extract::rejection::JsonRejection, response::Json};
+use jsonwebtoken::errors::{Error as JwtError, ErrorKind};
 
 use log::error;
 use serde::{Deserialize, Serialize};
@@ -36,7 +37,18 @@ pub async fn handler(
         Ok(claims) => claims,
         Err(e) => {
             error!("{}", e);
-            return Err(RequestError::InvalidRequest("Problem with jwt".to_string()));
+            let mut request_error = RequestError::InvalidToken("Problem with jwt".to_string());
+
+            if let Some(jwt_err) = e.downcast_ref::<JwtError>() {
+                match jwt_err.kind() {
+                    ErrorKind::ExpiredSignature => {
+                        request_error = RequestError::ExpiredToken();
+                    }
+                    _ => {}
+                }
+            }
+
+            return Err(request_error);
         }
     };
 
